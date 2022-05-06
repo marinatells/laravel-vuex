@@ -5,7 +5,7 @@
 3. php artisan key:generate
 4. создай новую БД, пропиши её настройки в файле .env
 5. php artisan migrate
-6. php db:seed
+6. php artisan db:seed
 7. npm i
 8. npm run dev
 
