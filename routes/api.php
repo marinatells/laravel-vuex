@@ -8,11 +8,18 @@ use Illuminate\Support\Facades\Hash;
 
 
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+Route::middleware('auth:sanctum')->get('/check-token', function (Request $request) {
+    return true;
+});
+
+
+Route::get('/user', function (Request $request) {
     return $request->user();
 });
 
 Route::post('/book/add', [BookController::class, 'add']);
+
+
 Route::get('/book/all', [BookController::class, 'all']);
 Route::post('/book/delete/{id}', [BookController::class, 'delete']);
 Route::post('/book/change_availabilty/{id}', [BookController::class, 'changeAvailabilty']);
@@ -26,7 +33,7 @@ Route::post('/token', function (Request $request) {
     }
     // Проверка пароля!
     if(Hash::check($request->password, $user->password)){
-        $token = $user->createToken($request->device_name)->plainTextToken;
+        $token = $user->createToken($request->device_name, ['*', 'allow-edit'])->plainTextToken;
         $user->remember_token = $token;
         $user->save();
         return $token;

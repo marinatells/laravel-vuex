@@ -5,37 +5,44 @@ import Store from "../views/Store.vue";
 import Admin from "../views/AdminView.vue";
 import Login from "../views/Login.vue";
 import Register from "../views/Register.vue";
+import axios from "axios";
 
+import store from "../store";
 Vue.use(VueRouter);
+
+function check(to, from, next) {
+    store.dispatch("checkToken").then((result) => {
+        result ? next() : next("/login");
+    });
+}
 
 const routes = [
     {
         path: "/",
         name: "Home",
         component: Home,
+        beforeEnter: check,
     },
-    {
-        path: "/store",
-        name: "Store",
-        component: Store,
-    },
-
     {
         path: "/admin",
         name: "Admin",
         component: Admin,
+        beforeEnter: check,
     },
-
     {
         path: "/login",
         name: "Login",
         component: Login,
     },
-
     {
         path: "/register",
         name: "Register",
         component: Register,
+    },
+    {
+        path: "/store",
+        name: "Store",
+        component: Store,
     },
 ];
 

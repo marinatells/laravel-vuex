@@ -89,47 +89,35 @@
 export default {
     data() {
         return {
-            booksArr: [],
-
             form: {
                 title: "",
                 author: "",
             },
         };
     },
+    computed: {
+        booksArr() {
+            return this.$store.state.books;
+        },
+    },
     methods: {
         loadBookList() {
-            axios.get("api/book/all").then((response) => {
-                this.booksArr = response.data;
-                console.log(this.booksArr);
-            });
+            this.$store.dispatch("getAll");
         },
         addBook() {
-            axios
-                .post("api/book/add", {
-                    title: this.form.title,
-                    author: this.form.author,
-                })
-                .then((response) => {
-                    console.log(this.booksArr);
-                });
-            this.loadBookList();
+            this.$store.dispatch("add", {
+                title: this.form.title,
+                author: this.form.author,
+            });
         },
         deleteBook(id) {
-            axios.post("api/book/delete/" + id).then((response) => {
-                console.log(response);
-            });
-            this.loadBookList();
+            this.$store.dispatch("delete", { id });
         },
         changeBookAvailability(id) {
-            axios.post("api/book/change_availabilty/" + id).then((response) => {
-                console.log(response);
-            });
-            this.loadBookList();
+            this.$store.dispatch("changeAvailability", { id });
         },
     },
     mounted() {
-        // Сразу после загрузки страницы подгружаем список книг и отображаем его
         this.loadBookList();
     },
 };

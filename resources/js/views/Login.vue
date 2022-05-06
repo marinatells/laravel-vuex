@@ -74,22 +74,16 @@ export default {
 
     methods: {
         getToken() {
-            axios
-                .post("api/token", {
+            this.$store
+                .dispatch("getToken", {
                     email: this.form.email,
                     password: this.form.password,
-                    device_name: navigator.userAgent,
                 })
-                .then((response) => {
-                    console.log("Token", response.data);
-                    this.token = response.data;
-                    if (this.token == "") {
-                        this.isCorrect = false;
-                    } else {
-                        localStorage.setItem("token", this.token);
+                .then(() => {
+                    if (this.$store.state.token) {
                         this.$router.push("/");
-
-                        // window.location='/';
+                    } else {
+                        this.isCorrect = false;
                     }
                 });
         },

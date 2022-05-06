@@ -20,13 +20,12 @@ class BookController extends Controller
         $book->availability = true;
         $book->save();
 
-        return redirect('/');
+        return $book;
     }
 
     public function delete(Request $request){
         $book = Book::find($request->id)->delete();
-
-        return redirect('/');
+        return response('ok', 200);
     }
 
     public function changeAvailabilty(Request $request){
@@ -34,6 +33,6 @@ class BookController extends Controller
         $book->availability = !($book->availability);
         $book->save();
 
-        return redirect('/');
+        return response('ok', 200);
     }
 }

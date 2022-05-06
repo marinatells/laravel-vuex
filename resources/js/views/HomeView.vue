@@ -38,20 +38,20 @@
 export default {
     data() {
         return {
-            booksArr: [],
             token: null,
         };
     },
+    computed: {
+        booksArr() {
+            return this.$store.state.books;
+        },
+    },
     methods: {
         loadBookList() {
-            axios.get("api/book/all").then((response) => {
-                this.booksArr = response.data;
-                //console.log(this.booksArr);
-            });
+            this.$store.dispatch("getAll");
         },
     },
     mounted() {
-        // Сразу после загрузки страницы подгружаем список книг и отображаем его
         this.loadBookList();
     },
 };
