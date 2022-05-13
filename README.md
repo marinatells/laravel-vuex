@@ -2,8 +2,8 @@
 
 1. `composer update`
 2. Копировать файл
-    3. `cp .env.example .env` (MacOS/Linux)
-    4. `copy .env.example .env` (Windows)
+    1. `cp .env.example .env` (MacOS/Linux)
+    2. `copy .env.example .env` (Windows)
 4. `php artisan key:generate`
 5. создай новую БД, пропиши её настройки в файле `.env`
 6. `php artisan migrate`
