@@ -36,11 +36,6 @@
 <style scoped></style>
 <script>
 export default {
-    data() {
-        return {
-            token: null,
-        };
-    },
     computed: {
         booksArr() {
             return this.$store.state.books;

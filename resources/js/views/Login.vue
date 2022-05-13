@@ -1,10 +1,6 @@
 <template>
-    <div id="app">
-        <link
-            rel="stylesheet"
-            href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        />
-        <form>
+    <div class="form-container">
+        <form @submit="getToken">
             <div class="mb-3">
                 <label for="exampleInputEmail1" class="form-label"
                     >Email address</label
@@ -31,30 +27,22 @@
                     id="exampleInputPassword1"
                 />
             </div>
-            <div class="mb-3 form-check">
-                <input
-                    type="checkbox"
-                    class="form-check-input"
-                    id="exampleCheck1"
-                />
-                <label class="form-check-label" for="exampleCheck1"
-                    >Check me out</label
-                >
-            </div>
-            <button type="button" class="btn btn-primary" @click="getToken()">
-                Submit
-            </button>
+            <button type="submit" class="btn btn-primary">Submit</button>
         </form>
         <h3 v-if="!isCorrect">Login or password is incorrect</h3>
     </div>
 </template>
 
 <style scoped>
-form {
-    padding: 20px;
-    padding-right: 70%;
+.form-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
 }
-h3 {
+
+.form-container h3 {
     color: red;
 }
 </style>
@@ -67,13 +55,13 @@ export default {
                 email: null,
                 password: null,
             },
-            token: null,
             isCorrect: true,
         };
     },
 
     methods: {
-        getToken() {
+        getToken(evt) {
+            evt.preventDefault();
             this.$store
                 .dispatch("getToken", {
                     email: this.form.email,

@@ -7,37 +7,54 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 
-
-Route::middleware('auth:sanctum')->get('/check-token', function (Request $request) {
-    return true;
-});
-
-
+// для проверки токена и для получения юзера
 Route::get('/user', function (Request $request) {
     return $request->user();
-});
-
-Route::post('/book/add', [BookController::class, 'add']);
+})->middleware(['auth:sanctum']);
 
 
-Route::get('/book/all', [BookController::class, 'all']);
-Route::post('/book/delete/{id}', [BookController::class, 'delete']);
-Route::post('/book/change_availabilty/{id}', [BookController::class, 'changeAvailabilty']);
-
+// создание токена по почте и паролю
+// https://laravel.su/docs/8.x/sanctum#issuing-api-tokens
 Route::post('/token', function (Request $request) {
-
     $user = User::where('email', $request->email)->first();
 
     if($user == null){
         return null;
     }
     // Проверка пароля!
-    if(Hash::check($request->password, $user->password)){
-        $token = $user->createToken($request->device_name, ['*', 'allow-edit'])->plainTextToken;
-        $user->remember_token = $token;
+    if(Hash::check($request->password, $user->password)) {
+        if ($user->name == 'Admin') {
+            $abilities = ['can-add', 'can-delete', 'can-edit'];
+        } else {
+            $abilities = ['can-edit'];
+        }
+
+        $token = $user->createToken($request->device_name, $abilities)->plainTextToken;
         $user->save();
         return $token;
     }else{
         return null;
     }
 });
+
+
+
+// создание токена по почте и паролю
+Route::post('/logout', function (Request $request) {
+    $request->user()->currentAccessToken()->delete();
+    return response('ok', 200);
+})->middleware(['auth:sanctum']);
+
+// Посмотреть список книг могут все пользователи
+Route::get('/book/all', [BookController::class, 'all']);
+
+// Добавить — только одмин
+Route::post('/book/add', [BookController::class, 'add'])
+    ->middleware(['auth:sanctum', 'abilities:can-add']);
+// Удалить — только одмин
+Route::post('/book/delete/{id}', [BookController::class, 'delete'])
+    ->middleware(['auth:sanctum', 'abilities:can-delete']);
+
+// Менятьдоступность — библиотекарь и одмин
+Route::post('/book/change_availabilty/{id}', [BookController::class, 'changeAvailabilty'])
+    ->middleware(['auth:sanctum', 'abilities:can-edit']);

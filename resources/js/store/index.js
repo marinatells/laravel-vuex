@@ -5,8 +5,19 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
     state: {
+        // индикатор загрузки приложения
+        isLoading: true,
+        // массив книг
         books: [],
+        // токен для запросов
         token: localStorage.getItem("token"),
+        // данные о пользователе
+        user: null,
+    },
+    getters: {
+        isLoggedIn(state) {
+            return !!state.user;
+        },
     },
     mutations: {
         setToken(state, payload) {
@@ -27,24 +38,61 @@ export default new Vuex.Store({
                 });
         },
 
-        checkToken(store) {
+        checkAuth(store) {
             const token = store.state.token;
+            const user = store.state.user;
 
             if (!token) {
+                store.state.isLoading = false;
                 return false;
             }
 
+            if (user) {
+                store.state.isLoading = false;
+                return true;
+            }
+
+            store.state.isLoading = true;
+            return store
+                .dispatch("getUser")
+                .then(() => {
+                    store.state.isLoading = false;
+                    return true;
+                })
+                .catch(() => {
+                    store.state.isLoading = false;
+                    return false;
+                });
+        },
+
+        logout(store) {
+            const token = store.state.token;
             return axios
-                .get("/api/check-token", {
+                .post("api/logout", null, {
                     headers: {
                         Authorization: "Bearer " + token,
                     },
                 })
-                .then(() => {
-                    return true;
+                .then((response) => {
+                    store.commit("setToken", { token: "" });
+                });
+        },
+
+        getUser(store) {
+            const token = store.state.token;
+            if (!token) {
+                store.state.user = null;
+                return;
+            }
+
+            return axios
+                .get("api/user", {
+                    headers: {
+                        Authorization: "Bearer " + token,
+                    },
                 })
-                .catch(() => {
-                    return false;
+                .then((response) => {
+                    store.state.user = response.data;
                 });
         },
 
@@ -55,8 +103,13 @@ export default new Vuex.Store({
         },
 
         changeAvailability(store, payload) {
+            const token = store.state.token;
             axios
-                .post("api/book/change_availabilty/" + payload.id)
+                .post("api/book/change_availabilty/" + payload.id, null, {
+                    headers: {
+                        Authorization: "Bearer " + token,
+                    },
+                })
                 .then((response) => {
                     const book = store.state.books.find(
                         (item) => item.id === payload.id
@@ -66,15 +119,28 @@ export default new Vuex.Store({
         },
 
         delete(store, payload) {
-            axios.post("api/book/delete/" + payload.id).then((response) => {
-                store.state.books = store.state.books.filter(
-                    (item) => item.id != payload.id
-                );
-            });
+            const token = store.state.token;
+            return axios
+                .post("api/book/delete/" + payload.id, null, {
+                    headers: {
+                        Authorization: "Bearer " + token,
+                    },
+                })
+                .then((response) => {
+                    store.state.books = store.state.books.filter(
+                        (item) => item.id != payload.id
+                    );
+
+                    return true;
+                })
+                .catch(() => {
+                    return false;
+                });
         },
 
         add(store, payload) {
-            axios
+            const token = store.state.token;
+            return axios
                 .post(
                     "api/book/add",
                     {
@@ -83,13 +149,16 @@ export default new Vuex.Store({
                     },
                     {
                         headers: {
-                            Authorization:
-                                "Bearer " + localStorage.getItem("token"),
+                            Authorization: "Bearer " + token,
                         },
                     }
                 )
                 .then((response) => {
                     store.state.books.push(response.data);
+                    return true;
+                })
+                .catch(() => {
+                    return false;
                 });
         },
     },

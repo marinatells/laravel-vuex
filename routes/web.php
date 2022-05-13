@@ -17,7 +17,3 @@ Route::get('/{any}', function () {
     return view('vue');
 })->where('any', '.*');
 
-Route::get('/login', function () {
-    return view('login');
-})->name('login');
-
